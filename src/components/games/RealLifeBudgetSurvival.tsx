@@ -165,17 +165,17 @@ export function RealLifeBudgetSurvival({ onComplete }: { onComplete: (score: num
 
       {/* Wallet Status */}
       <div className="max-w-4xl mx-auto w-full grid grid-cols-3 gap-4">
-        <Card className="glass-card border border-accent/40 p-5 rounded-xl hover:border-accent/60 transition-colors">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Monthly Salary</p>
-          <p className="text-3xl font-bold text-accent">₹{gameState.salary}</p>
+        <Card className="glass-card border border-accent/40 p-5 rounded-xl hover:border-accent/60 transition-colors flex flex-col">
+          <p className="text-xs font-medium text-muted-foreground mb-3">Monthly Salary</p>
+          <p className="text-3xl font-bold text-accent text-right">₹{gameState.salary}</p>
         </Card>
-        <Card className="glass-card border border-primary/40 p-5 rounded-xl hover:border-primary/60 transition-colors">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Current Wallet</p>
-          <p className="text-3xl font-bold text-primary">₹{gameState.wallet}</p>
+        <Card className="glass-card border border-primary/40 p-5 rounded-xl hover:border-primary/60 transition-colors flex flex-col">
+          <p className="text-xs font-medium text-muted-foreground mb-3">Current Wallet</p>
+          <p className="text-3xl font-bold text-primary text-right">₹{gameState.wallet}</p>
         </Card>
-        <Card className="glass-card border border-secondary/40 p-5 rounded-xl hover:border-secondary/60 transition-colors">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Potential Savings</p>
-          <p className={`text-3xl font-bold ${gameState.wallet >= 500 ? "text-secondary" : "text-destructive"}`}>
+        <Card className="glass-card border border-secondary/40 p-5 rounded-xl hover:border-secondary/60 transition-colors flex flex-col">
+          <p className="text-xs font-medium text-muted-foreground mb-3">Potential Savings</p>
+          <p className={`text-3xl font-bold text-right ${gameState.wallet >= 500 ? "text-secondary" : "text-destructive"}`}>
             ₹{Math.max(0, gameState.wallet - 1900)}
           </p>
         </Card>
