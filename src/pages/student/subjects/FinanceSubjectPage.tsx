@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
 import { GameBadge } from "@/components/ui/game-badge";
+import { GameIntroModal, GameContainer } from "@/components/games";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Wallet, 
@@ -18,6 +19,16 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import {
+  PocketMoneyManager,
+  SmartShopperChallenge,
+  SavingsGrower,
+  BankingBasicsSimulator,
+  PriceCompareMaster,
+  MiniBusinessTycoon,
+  DigitalMoneyExplorer,
+} from "@/components/games";
+
 interface GameCard {
   id: string;
   name: string;
@@ -28,6 +39,16 @@ interface GameCard {
   difficulty: "easy" | "medium" | "hard";
   status: "available" | "locked";
   route: string;
+  introConfig: {
+    conceptName: string;
+    concept: string;
+    whatYouLearn: string[];
+    howToPlay: string[];
+    outcome: string;
+  };
+  component: React.ComponentType<{ onComplete: (score: number) => void }>;
+  instructions: string;
+  conceptLearned: string;
 }
 
 const financeGames: GameCard[] = [
@@ -40,7 +61,28 @@ const financeGames: GameCard[] = [
     coins: 50,
     difficulty: "easy",
     status: "available",
-    route: "/student/finance/game/pocket-money"
+    route: "/student/finance/game/pocket-money",
+    component: PocketMoneyManager,
+    instructions:
+      "You have ₹500 for the month. Every day, you'll see mandatory (must pay) and optional (nice to have) expenses. Decide which ones to pay. Your goal is to finish the month with savings! Remember: necessities come first.",
+    conceptLearned:
+      "Budgeting is about managing your money wisely. Spending on needs keeps you healthy and safe. Optional wants can wait. Small savings every day add up!",
+    introConfig: {
+      conceptName: "Pocket Money Manager",
+      concept: "Budgeting & Expense Control",
+      whatYouLearn: [
+        "Manage ₹500 throughout a month",
+        "Prioritize needs over wants and watch your savings grow",
+      ],
+      howToPlay: [
+        "Each day, you'll see mandatory expenses (like travel) and optional ones (like snacks)",
+        "Drag money from your wallet to pay for items",
+        "Unspent money goes to your savings jar",
+        "Finish day 30 with money left = you win!",
+      ],
+      outcome:
+        "You'll understand that smart spending leads to real savings—the foundation of financial health!",
+    },
   },
   {
     id: "smart-shopper",
@@ -51,7 +93,28 @@ const financeGames: GameCard[] = [
     coins: 50,
     difficulty: "easy",
     status: "available",
-    route: "/student/finance/game/smart-shopper"
+    route: "/student/finance/game/smart-shopper",
+    component: SmartShopperChallenge,
+    instructions:
+      "Visit three different market scenes with different items to buy. Items are labeled as either NEEDS (green) or WANTS (yellow). Select items wisely and checkout. You'll see how many needs vs wants you picked and get feedback on your choices.",
+    conceptLearned:
+      "Needs are things you must have (food, school supplies). Wants are extras you'd like (toys, games). Spending money on needs first is smart because they keep you healthy and help you learn.",
+    introConfig: {
+      conceptName: "Smart Shopper Challenge",
+      concept: "Needs vs Wants",
+      whatYouLearn: [
+        "Identify what you truly NEED vs what you WANT",
+        "Balance your budget by choosing wisely in a market",
+      ],
+      howToPlay: [
+        "Visit the market and see items with prices",
+        "Drag items into your basket to select them",
+        "Green items = NEEDS, Yellow items = WANTS",
+        "Checkout and see your wise (or not so wise!) choices",
+      ],
+      outcome:
+        "You'll master the art of smart shopping—knowing the difference between needs and wants saves money!",
+    },
   },
   {
     id: "savings-grower",
@@ -62,7 +125,28 @@ const financeGames: GameCard[] = [
     coins: 50,
     difficulty: "medium",
     status: "available",
-    route: "/student/finance/game/savings-grower"
+    route: "/student/finance/game/savings-grower",
+    component: SavingsGrower,
+    instructions:
+      "You have a plant that grows when you save money consistently. Every day, decide: save ₹100 or skip. Save for 15 consecutive days to win! But if you skip days, your plant wilts. The key: consistency beats big one-time savings.",
+    conceptLearned:
+      "Small, regular savings are more powerful than big, rare ones. Saving ₹100 every day for 15 days builds ₹1500 and stronger money habits. Missing days sets you back.",
+    introConfig: {
+      conceptName: "Savings Grower",
+      concept: "Consistency > Amount",
+      whatYouLearn: [
+        "Save a little bit every day for 15 days straight",
+        "Watch your plant grow with regular deposits",
+      ],
+      howToPlay: [
+        "Each day, choose to save ₹100 or skip",
+        "Saving adds water to grow your plant",
+        "Missing a day causes your plant to wilt",
+        "Reach 15 consecutive saving days to win!",
+      ],
+      outcome:
+        "You'll learn that showing up every day—even with small amounts—creates real wealth and strong habits!",
+    },
   },
   {
     id: "banking-basics",
@@ -73,7 +157,28 @@ const financeGames: GameCard[] = [
     coins: 60,
     difficulty: "medium",
     status: "available",
-    route: "/student/finance/game/banking-basics"
+    route: "/student/finance/game/banking-basics",
+    component: BankingBasicsSimulator,
+    instructions:
+      "Start a bank account and manage it for a year. Make deposits, watch your money grow through interest, and see how withdrawals stop your growth. You'll earn about 5% annual interest, so bigger deposits = bigger returns!",
+    conceptLearned:
+      "Banks pay you interest on your savings! The more you save and the longer you leave it, the more it grows. Early withdrawals stop the growth. This is how long-term wealth is built.",
+    introConfig: {
+      conceptName: "Banking Basics Simulator",
+      concept: "How Banks Grow Money",
+      whatYouLearn: [
+        "Deposit money and watch it grow through interest",
+        "Keep money in longer = bigger returns",
+      ],
+      howToPlay: [
+        "Start by making your first deposit",
+        "Each month, your money grows by ~0.42% in interest",
+        "Deposit more to earn more or withdraw to spend",
+        "Run the bank for 12 months to see final growth",
+      ],
+      outcome:
+        "You'll understand that banks reward savers with interest—the earlier you start, the more you grow!",
+    },
   },
   {
     id: "price-compare",
@@ -84,7 +189,28 @@ const financeGames: GameCard[] = [
     coins: 50,
     difficulty: "medium",
     status: "available",
-    route: "/student/finance/game/price-compare"
+    route: "/student/finance/game/price-compare",
+    component: PriceCompareMaster,
+    instructions:
+      "Three shops sell the same product at different prices and quantities. Pick the best value! Remember: lowest price isn't always best value. Calculate price per unit to make smart choices. Correct answers earn points!",
+    conceptLearned:
+      "Best value = lowest price PER UNIT, not the lowest total price. ₹100 for 2 liters (₹50/L) is better than ₹60 for 1 liter (₹60/L). Always do the math!",
+    introConfig: {
+      conceptName: "Price Compare Master",
+      concept: "Best Value ≠ Lowest Price",
+      whatYouLearn: [
+        "Calculate price per unit to find the real best deal",
+        "Bigger packs often have better per-unit pricing",
+      ],
+      howToPlay: [
+        "Three shops sell the same product",
+        "Each has different price and quantity",
+        "Calculate the price per unit for each",
+        "Pick the option with the lowest per-unit cost",
+      ],
+      outcome:
+        "You'll become a smart shopper who saves money by comparing value, not just price!",
+    },
   },
   {
     id: "business-tycoon",
@@ -95,7 +221,28 @@ const financeGames: GameCard[] = [
     coins: 60,
     difficulty: "hard",
     status: "available",
-    route: "/student/finance/game/business-tycoon"
+    route: "/student/finance/game/business-tycoon",
+    component: MiniBusinessTycoon,
+    instructions:
+      "Run a lemonade stall for 7 days. Buy materials (₹30 per glass), set your selling price, and serve customers. Customers buy more at lower prices but with less profit per item. Higher prices = more profit per item but fewer customers. Find the balance!",
+    conceptLearned:
+      "Profit = Revenue - Cost. Lower prices attract more customers (more volume), higher prices earn more per item. The best business owners find the sweet spot that maximizes total profit, not just price or volume.",
+    introConfig: {
+      conceptName: "Mini Business Tycoon",
+      concept: "Profit & Loss Management",
+      whatYouLearn: [
+        "Buy materials and create inventory",
+        "Set competitive prices and manage profit margins",
+      ],
+      howToPlay: [
+        "Buy materials (each item costs ₹30 to make)",
+        "Set a selling price (higher = more profit per item)",
+        "Each day, customers come to buy based on your price",
+        "Run for 7 days and see your total profit",
+      ],
+      outcome:
+        "You'll learn that business success is about balancing price, volume, and profit. Great entrepreneurs think strategically!",
+    },
   },
   {
     id: "digital-money",
@@ -106,7 +253,28 @@ const financeGames: GameCard[] = [
     coins: 50,
     difficulty: "medium",
     status: "available",
-    route: "/student/finance/game/digital-money"
+    route: "/student/finance/game/digital-money",
+    component: DigitalMoneyExplorer,
+    instructions:
+      "Face 4 real-world shopping scenarios (street vendor, supermarket, etc.). For each, choose between cash, debit card, or mobile payment. You'll see how each method works and learn when to use each one. Different situations call for different payment methods!",
+    conceptLearned:
+      "Cash is best for small purchases (immediate, no fees). Cards are best for large purchases (safe, tracked). Mobile payments are fastest for medium purchases. Understanding pros and cons helps you choose wisely!",
+    introConfig: {
+      conceptName: "Digital Money Explorer",
+      concept: "Cash vs Digital Payments",
+      whatYouLearn: [
+        "Understand when to use cash, cards, or mobile payments",
+        "Learn the pros and cons of each method",
+      ],
+      howToPlay: [
+        "Read a shopping scenario",
+        "Choose your payment method: cash, card, or mobile",
+        "See how the transaction processes",
+        "Learn the best practice for that situation",
+      ],
+      outcome:
+        "You'll be a payment expert—knowing exactly when and how to pay makes transactions smooth and safe!",
+    },
   },
 ];
 
@@ -180,12 +348,57 @@ function GameCardComponent({ game, onPlay }: GameCardProps) {
 
 export default function FinanceSubjectPage() {
   const [selectedGame, setSelectedGame] = useState<GameCard | null>(null);
+  const [showIntro, setShowIntro] = useState(false);
+  const [playingGame, setPlayingGame] = useState<GameCard | null>(null);
   const totalProgress = 65;
 
   const handlePlayGame = (game: GameCard) => {
     setSelectedGame(game);
-    // Game will be launched from modal in next step
+    setShowIntro(true);
   };
+
+  const handleStartGame = () => {
+    if (selectedGame) {
+      setShowIntro(false);
+      setPlayingGame(selectedGame);
+    }
+  };
+
+  const handleGoBack = () => {
+    setShowIntro(false);
+    setSelectedGame(null);
+  };
+
+  const handleGameComplete = () => {
+    setPlayingGame(null);
+    setSelectedGame(null);
+  };
+
+  const handleExitGame = () => {
+    setPlayingGame(null);
+    setSelectedGame(null);
+  };
+
+  // Show active game view
+  if (playingGame) {
+    const GameComponent = playingGame.component;
+    return (
+      <AppLayout role="student" playCoins={1250} title={playingGame.name}>
+        <div className="px-4 py-6 pb-24">
+          <GameContainer
+            gameComponent={
+              <GameComponent onComplete={handleGameComplete} />
+            }
+            instructions={playingGame.instructions}
+            conceptLearned={playingGame.conceptLearned}
+            onRetry={() => setPlayingGame(playingGame)}
+            onExit={handleExitGame}
+            gameName={playingGame.name}
+          />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout role="student" playCoins={1250} title="Finance">
@@ -340,6 +553,19 @@ export default function FinanceSubjectPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Game Intro Modal */}
+      {selectedGame && (
+        <GameIntroModal
+          isOpen={showIntro}
+          config={{
+            ...selectedGame.introConfig,
+            gameIcon: selectedGame.icon,
+          }}
+          onStartGame={handleStartGame}
+          onGoBack={handleGoBack}
+        />
+      )}
     </AppLayout>
   );
 }
