@@ -573,7 +573,7 @@ export default function TasksPage() {
                             </div>
                           )}
 
-                          {/* Footer: Rewards & Action */}
+                          {/* Footer: Rewards & Status */}
                           <div className="flex items-center justify-between">
                             {/* Rewards */}
                             <div className="flex items-center gap-3">
@@ -590,7 +590,13 @@ export default function TasksPage() {
                             {/* Status Badge */}
                             <Badge
                               variant="outline"
-                              className={`text-xs ${isCompleted ? "bg-secondary/10 text-secondary" : ""}`}
+                              className={`text-xs ${
+                                isCompleted
+                                  ? "bg-secondary/10 text-secondary"
+                                  : isActive
+                                  ? "bg-accent/10 text-accent"
+                                  : "bg-primary/10 text-primary"
+                              }`}
                             >
                               {statusCfg.label}
                             </Badge>
@@ -598,26 +604,39 @@ export default function TasksPage() {
                         </div>
                       </div>
 
-                      {/* CTA Button */}
-                      {!isCompleted && (
+                      {/* CTA Buttons - Status Specific */}
+                      {isAvailable && (
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelectTask(userTask.id);
                           }}
-                          className="w-full bg-gradient-to-r from-primary to-primary/80 text-sm"
+                          className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-sm font-semibold"
                           size="sm"
                         >
-                          {userTask.status === "in_progress" ? "Continue Task" : "Start Task"}
+                          🚀 Start Task
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       )}
 
-                      {/* Completion Message */}
+                      {isActive && (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTask(userTask.id);
+                          }}
+                          className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-sm font-semibold"
+                          size="sm"
+                        >
+                          ▶️ Continue Task
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      )}
+
                       {isCompleted && (
-                        <div className="flex items-center justify-center gap-2 text-secondary text-sm font-medium py-1">
+                        <div className="flex items-center justify-center gap-2 text-secondary text-sm font-medium py-2 bg-secondary/10 rounded-lg">
                           <CheckCircle2 className="h-4 w-4" />
-                          Task Completed
+                          ✅ Completed
                         </div>
                       )}
                     </div>
