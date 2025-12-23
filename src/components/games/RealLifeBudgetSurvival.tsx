@@ -233,7 +233,7 @@ export function RealLifeBudgetSurvival({ onComplete }: { onComplete: (score: num
                     size="sm"
                     onClick={() => handlePayExpense(expense)}
                     disabled={gameState.wallet < expense.amount}
-                    className="w-full bg-secondary hover:bg-secondary/90"
+                    className="w-full bg-secondary hover:bg-secondary/90 text-xs sm:text-sm"
                   >
                     Pay Now
                   </Button>
@@ -241,18 +241,18 @@ export function RealLifeBudgetSurvival({ onComplete }: { onComplete: (score: num
                     size="sm"
                     variant="outline"
                     onClick={() => handleDelayExpense(expense)}
-                    className="w-full"
+                    className="w-full text-xs sm:text-sm"
                   >
                     Delay (adds stress)
                   </Button>
                   {expense.category === "random" && (
-                    <Button size="sm" variant="ghost" onClick={() => handleSkipExpense(expense)} className="w-full">
+                    <Button size="sm" variant="ghost" onClick={() => handleSkipExpense(expense)} className="w-full text-xs sm:text-sm">
                       Skip
                     </Button>
                   )}
                 </div>
               ) : (
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground font-medium">
                   {decision === "paid" && "✅ Paid"}
                   {decision === "delayed" && "⏰ Delayed"}
                   {decision === "skipped" && "✂️ Skipped"}
