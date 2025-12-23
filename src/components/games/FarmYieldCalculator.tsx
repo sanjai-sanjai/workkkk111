@@ -1,91 +1,427 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Zap } from "lucide-react";
+import { RotateCcw, Maximize2, X } from "lucide-react";
+
+interface FarmLevel {
+  targetYield: number;
+  idealFieldSize: number;
+  idealSeeds: number;
+  idealWater: number;
+  tolerance: number;
+}
+
+interface GameState {
+  fieldSize: number;
+  seeds: number;
+  water: number;
+  yield: number;
+  isFullscreen: boolean;
+  gameResult: "none" | "won" | "lost";
+}
 
 export function FarmYieldCalculator({ onClose }: { onClose: () => void }) {
   const [gameStarted, setGameStarted] = useState(false);
-  const [gridWidth, setGridWidth] = useState(5);
-  const [gridHeight, setGridHeight] = useState(5);
-  const [seedDensity, setSeedDensity] = useState(1);
-  const [harvested, setHarvested] = useState(false);
-  const [yield_, setYield] = useState(0);
-  const [feedback, setFeedback] = useState<"none" | "optimal" | "poor">("none");
+  const [currentLevel, setCurrentLevel] = useState(0);
   const [score, setScore] = useState(0);
-  const [round, setRound] = useState(1);
+  const [gameState, setGameState] = useState<GameState>({
+    fieldSize: 5,
+    seeds: 50,
+    water: 50,
+    yield: 0,
+    isFullscreen: false,
+    gameResult: "none",
+  });
 
-  const optimalSeedDensity = 0.8;
-  const landArea = gridWidth * gridHeight;
-  const optimalYield = Math.floor(landArea * 100 * optimalSeedDensity);
-  
-  // Calculate yield based on seed density
-  const calculateYield = () => {
-    const wastePercentage = Math.abs(seedDensity - optimalSeedDensity) * 100;
-    const efficiency = Math.max(0, 100 - wastePercentage * 50);
-    const calculatedYield = Math.floor((landArea * 100 * seedDensity * efficiency) / 100);
-    return calculatedYield;
+  const levels: FarmLevel[] = [
+    {
+      targetYield: 500,
+      idealFieldSize: 5,
+      idealSeeds: 100,
+      idealWater: 75,
+      tolerance: 50,
+    },
+    {
+      targetYield: 1200,
+      idealFieldSize: 10,
+      idealSeeds: 200,
+      idealWater: 80,
+      tolerance: 100,
+    },
+    {
+      targetYield: 2000,
+      idealFieldSize: 15,
+      idealSeeds: 300,
+      idealWater: 85,
+      tolerance: 150,
+    },
+  ];
+
+  const level = levels[currentLevel];
+
+  useEffect(() => {
+    calculateYield(gameState.fieldSize, gameState.seeds, gameState.water);
+  }, [gameState.fieldSize, gameState.seeds, gameState.water]);
+
+  const calculateYield = (fieldSize: number, seeds: number, water: number) => {
+    // Formula: Yield = fieldSize × (seeds/100) × (water/100) × 100
+    const yieldAmount = Math.round((fieldSize * seeds * water) / 100);
+    setGameState((prev) => ({
+      ...prev,
+      yield: yieldAmount,
+    }));
   };
 
-  const handleHarvest = () => {
-    const harvestYield = calculateYield();
-    setYield(harvestYield);
-    setHarvested(true);
+  const checkSuccess = () => {
+    const difference = Math.abs(gameState.yield - level.targetYield);
+    const targetMet = difference <= level.tolerance;
 
-    if (Math.abs(seedDensity - optimalSeedDensity) < 0.15) {
-      setFeedback("optimal");
-      setScore(score + 15);
+    if (targetMet) {
+      setGameState((prev) => ({
+        ...prev,
+        gameResult: "won",
+      }));
     } else {
-      setFeedback("poor");
+      setGameState((prev) => ({
+        ...prev,
+        gameResult: "lost",
+      }));
     }
   };
 
-  const nextRound = () => {
-    if (round < 3) {
-      setRound(round + 1);
-      setGridWidth(4 + Math.floor(Math.random() * 4));
-      setGridHeight(4 + Math.floor(Math.random() * 4));
-      setSeedDensity(1);
-      setHarvested(false);
-      setFeedback("none");
-      setYield(0);
+  const handleReset = () => {
+    setGameState({
+      fieldSize: 5,
+      seeds: 50,
+      water: 50,
+      yield: 0,
+      isFullscreen: gameState.isFullscreen,
+      gameResult: "none",
+    });
+  };
+
+  const handleRetry = () => {
+    handleReset();
+  };
+
+  const nextLevel = () => {
+    if (currentLevel < levels.length - 1) {
+      setCurrentLevel(currentLevel + 1);
+      setScore(score + 85);
+      handleReset();
     } else {
       setGameStarted(false);
     }
   };
+
+  const toggleFullscreen = () => {
+    setGameState({
+      ...gameState,
+      isFullscreen: !gameState.isFullscreen,
+    });
+  };
+
+  const yieldPercentage = Math.round((gameState.yield / level.targetYield) * 100);
+  const isOptimal = yieldPercentage >= 90 && yieldPercentage <= 110;
+  const isTooLow = yieldPercentage < 90;
 
   if (!gameStarted) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Farm Yield Calculator 🌾</DialogTitle>
+            <DialogTitle>🌾 Farm Yield Calculator</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <h3 className="font-semibold">📘 What You Will Discover</h3>
+              <h3 className="font-semibold">📈 Concept: Multiplication, Ratios & Estimation</h3>
               <p className="text-sm text-muted-foreground">
-                How land size and seeds affect crop yield.
+                Control field size, seeds, and water to maximize crop yield.
               </p>
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold">🎯 What You Need To Do</h3>
+              <h3 className="font-semibold">🎯 How to Play</h3>
               <p className="text-sm text-muted-foreground">
-                Choose land size, adjust seed density, and predict harvest yield.
+                Adjust sliders to optimize inputs. Your yield depends on the math you choose!
               </p>
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold">🏆 What Success Looks Like</h3>
+              <h3 className="font-semibold">🏆 Why It's Powerful</h3>
               <p className="text-sm text-muted-foreground">
-                Healthy crops and maximum profit through optimal planning.
+                Shows math as decision-based and teaches cause → effect relationships.
               </p>
             </div>
-            <Button onClick={() => setGameStarted(true)} className="w-full">
-              Start Game
-            </Button>
+            <div className="flex gap-2 pt-4">
+              <Button onClick={onClose} variant="outline" className="flex-1">
+                ❌ Go Back
+              </Button>
+              <Button onClick={() => setGameStarted(true)} className="flex-1">
+                ▶️ Start Game
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
+    );
+  }
+
+  const GameplayUI = () => (
+    <div className="space-y-6">
+      {/* Target Display */}
+      <div className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg p-6 border-2 border-green-500">
+        <div className="text-center mb-3">
+          <div className="text-sm font-semibold text-muted-foreground">🎯 Target Yield</div>
+          <div className="text-4xl font-bold text-green-700 dark:text-green-300">
+            {level.targetYield} 🌾
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground text-center">
+          Acceptable range: {level.targetYield - level.tolerance} - {level.targetYield + level.tolerance}
+        </div>
+      </div>
+
+      {/* Farm Field Visualization */}
+      <div className="bg-gradient-to-b from-amber-100 to-amber-200 dark:from-amber-900 dark:to-amber-800 rounded-lg p-6">
+        <div className="text-center mb-4">
+          <div className="text-5xl mb-2">🌾</div>
+          <div className="text-sm font-semibold text-muted-foreground">
+            Your Farm (Field Size: {gameState.fieldSize})
+          </div>
+        </div>
+
+        {/* Field Growth Visualization */}
+        <div className="flex justify-center gap-1 flex-wrap">
+          {Array(Math.round(gameState.fieldSize / 2))
+            .fill(0)
+            .map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-8 h-8 rounded flex items-center justify-center transition-all ${
+                  gameState.water > 50
+                    ? "bg-green-500 text-white text-lg scale-100"
+                    : "bg-amber-500 text-white text-lg scale-75"
+                }`}
+              >
+                {gameState.water > 50 ? "🌱" : "🍂"}
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* Yield Display */}
+      <div
+        className={`rounded-lg p-6 text-center border-2 transition-all ${
+          isOptimal
+            ? "bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 border-green-500"
+            : isTooLow
+              ? "bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 border-red-500"
+              : "bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800 border-yellow-500"
+        }`}
+      >
+        <div className="text-sm font-semibold text-muted-foreground mb-2">
+          📊 Current Yield
+        </div>
+        <div className="text-4xl font-bold mb-2">
+          {gameState.yield} 🌾
+        </div>
+        <div className="text-sm font-semibold">
+          {yieldPercentage}% of target
+        </div>
+        {isOptimal && (
+          <div className="text-sm text-green-700 dark:text-green-300 mt-2">
+            ✅ Perfect balance!
+          </div>
+        )}
+        {isTooLow && (
+          <div className="text-sm text-red-700 dark:text-red-300 mt-2">
+            ❌ Need more growth
+          </div>
+        )}
+        {!isOptimal && !isTooLow && (
+          <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-2">
+            ⚠️ Close but not quite
+          </div>
+        )}
+      </div>
+
+      {/* Controls */}
+      <div className="space-y-4 bg-card rounded-lg p-4 border border-muted">
+        {/* Field Size */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold">🌾 Field Size</label>
+            <span className="text-lg font-bold text-badge">{gameState.fieldSize} sq units</span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="20"
+            value={gameState.fieldSize}
+            onChange={(e) =>
+              setGameState({
+                ...gameState,
+                fieldSize: parseInt(e.target.value),
+              })
+            }
+            disabled={gameState.gameResult !== "none"}
+            className="w-full h-2 bg-gradient-to-r from-red-400 to-green-400 rounded cursor-pointer disabled:opacity-50"
+          />
+          <div className="text-xs text-muted-foreground text-right">
+            Min 1 | Max 20
+          </div>
+        </div>
+
+        {/* Seeds */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold">🌱 Seeds Count</label>
+            <span className="text-lg font-bold text-badge">{gameState.seeds}</span>
+          </div>
+          <input
+            type="range"
+            min="10"
+            max="500"
+            step="10"
+            value={gameState.seeds}
+            onChange={(e) =>
+              setGameState({
+                ...gameState,
+                seeds: parseInt(e.target.value),
+              })
+            }
+            disabled={gameState.gameResult !== "none"}
+            className="w-full h-2 bg-gradient-to-r from-amber-400 to-green-400 rounded cursor-pointer disabled:opacity-50"
+          />
+          <div className="text-xs text-muted-foreground text-right">
+            Min 10 | Max 500
+          </div>
+        </div>
+
+        {/* Water */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold">💧 Water Level</label>
+            <span className="text-lg font-bold text-badge">{gameState.water}%</span>
+          </div>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            value={gameState.water}
+            onChange={(e) =>
+              setGameState({
+                ...gameState,
+                water: parseInt(e.target.value),
+              })
+            }
+            disabled={gameState.gameResult !== "none"}
+            className="w-full h-2 bg-gradient-to-r from-blue-400 to-cyan-400 rounded cursor-pointer disabled:opacity-50"
+          />
+          <div className="text-xs text-muted-foreground text-right">
+            Min 10 | Max 100
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Box */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-muted rounded-lg p-3 text-center">
+          <div className="text-xs text-muted-foreground mb-1">Ideal Field</div>
+          <div className="font-bold text-badge">{level.idealFieldSize}</div>
+        </div>
+        <div className="bg-muted rounded-lg p-3 text-center">
+          <div className="text-xs text-muted-foreground mb-1">Ideal Seeds</div>
+          <div className="font-bold text-badge">{level.idealSeeds}</div>
+        </div>
+        <div className="bg-muted rounded-lg p-3 text-center">
+          <div className="text-xs text-muted-foreground mb-1">Ideal Water</div>
+          <div className="font-bold text-badge">{level.idealWater}%</div>
+        </div>
+      </div>
+
+      {/* Game Result */}
+      {gameState.gameResult === "won" && (
+        <div className="bg-green-100 dark:bg-green-900 rounded-lg p-4 text-center border-2 border-green-500">
+          <div className="text-4xl mb-2">🎉</div>
+          <div className="font-bold text-lg text-green-800 dark:text-green-200">
+            Harvest Success!
+          </div>
+          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+            Your yield reached {gameState.yield} bushels!
+          </p>
+        </div>
+      )}
+
+      {gameState.gameResult === "lost" && (
+        <div className="bg-red-100 dark:bg-red-900 rounded-lg p-4 text-center border-2 border-red-500">
+          <div className="text-4xl mb-2">❌</div>
+          <div className="font-bold text-lg text-red-800 dark:text-red-200">
+            Yield Too Low
+          </div>
+          <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+            You got {gameState.yield} but needed {level.targetYield}
+          </p>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        {gameState.gameResult === "none" && (
+          <>
+            <Button onClick={handleReset} variant="outline" className="flex-1">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+            </Button>
+            <Button onClick={checkSuccess} className="flex-1">
+              🌾 Check Yield
+            </Button>
+          </>
+        )}
+        {gameState.gameResult !== "none" && (
+          <>
+            <Button onClick={handleRetry} variant="outline" className="flex-1">
+              Try Again
+            </Button>
+            {gameState.gameResult === "won" && currentLevel < levels.length - 1 && (
+              <Button onClick={nextLevel} className="flex-1">
+                Next Level →
+              </Button>
+            )}
+            {gameState.gameResult === "won" && currentLevel === levels.length - 1 && (
+              <Button onClick={() => setGameStarted(false)} className="flex-1">
+                Finish Game
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Info Strip */}
+      <div className="bg-muted rounded-lg p-3 text-center text-sm font-semibold text-muted-foreground">
+        💡 "Balance all inputs to maximize your harvest!"
+      </div>
+    </div>
+  );
+
+  if (gameState.isFullscreen) {
+    return (
+      <div className="fixed inset-0 bg-background z-50 p-4 flex flex-col overflow-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-badge">
+            🌾 Farm Yield Calculator - Level {currentLevel + 1}/{levels.length}
+          </h2>
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 hover:bg-muted rounded-lg transition"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex-1 max-w-2xl mx-auto w-full">
+          <GameplayUI />
+        </div>
+      </div>
     );
   }
 
@@ -93,136 +429,27 @@ export function FarmYieldCalculator({ onClose }: { onClose: () => void }) {
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Farm Yield Calculator 🌾 - Round {round}/3</DialogTitle>
-          <div className="flex gap-4 mt-4">
-            <div>Score: <span className="font-bold">{score}</span></div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Farm Grid Visualization */}
-          <div className="bg-green-50 dark:bg-green-950 rounded-lg p-6">
-            <p className="text-sm font-semibold mb-4">🌱 Your Farm Field</p>
-            <div className="mb-4 text-center">
-              <p className="text-sm text-muted-foreground">Land Size: {gridWidth}m × {gridHeight}m</p>
-              <p className="font-bold text-lg">Total Area: {landArea} m²</p>
-            </div>
-            
-            {/* Grid Display */}
-            <div 
-              className="inline-block gap-1 p-4 bg-white dark:bg-slate-800 rounded border border-green-300"
-              style={{
-                display: "inline-grid",
-                gridTemplateColumns: `repeat(${gridWidth}, 1fr)`,
-                margin: "0 auto",
-              }}
-            >
-              {Array.from({ length: landArea }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`w-8 h-8 rounded flex items-center justify-center text-lg transition ${
-                    seedDensity > 0.7 ? "bg-yellow-300" : "bg-yellow-100"
-                  }`}
-                  title={`Cell ${idx + 1}`}
-                >
-                  {seedDensity > 0.7 ? "🌾" : seedDensity > 0.3 ? "🌱" : "🌍"}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Seed Density Control */}
-          {!harvested && (
-            <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4">
-              <p className="text-sm font-semibold mb-4">🌱 Adjust Seed Density</p>
-              <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <DialogTitle>
+                🌾 Farm Yield Calculator - Level {currentLevel + 1}/{levels.length}
+              </DialogTitle>
+              <div className="flex gap-4 mt-4 text-sm">
                 <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm">Current: {(seedDensity * 100).toFixed(0)}%</span>
-                    <span className="text-xs text-muted-foreground">(Optimal: 80%)</span>
-                  </div>
-                  <Slider
-                    value={[seedDensity]}
-                    onValueChange={(v) => setSeedDensity(v[0])}
-                    min={0.2}
-                    max={1.5}
-                    step={0.1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>Too Few</span>
-                    <span>Perfect</span>
-                    <span>Too Many</span>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-800 rounded p-3">
-                  <p className="text-sm mb-2">📊 Predicted Outcome:</p>
-                  <p className="font-bold text-lg text-primary">
-                    ~{Math.floor(landArea * 100 * seedDensity)} kg harvest
-                  </p>
-                  {seedDensity < 0.5 && <p className="text-xs text-orange-600 mt-1">⚠️ Too few seeds - wasting land!</p>}
-                  {seedDensity > 1.2 && <p className="text-xs text-orange-600 mt-1">⚠️ Too many seeds - overcrowding!</p>}
+                  Score: <span className="font-bold text-badge">{score}</span>
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Harvest Results */}
-          {harvested && (
-            <div className={`p-4 rounded-lg ${
-              feedback === "optimal"
-                ? "bg-green-100 dark:bg-green-900"
-                : "bg-orange-100 dark:bg-orange-900"
-            }`}>
-              <p className="text-sm font-semibold mb-2">🌾 Harvest Results</p>
-              <p className="text-3xl font-bold mb-2">
-                {yield_} kg 🌾
-              </p>
-              {feedback === "optimal" && (
-                <div className="text-green-800 dark:text-green-200">
-                  <p className="font-bold">✓ Excellent Yield!</p>
-                  <p className="text-sm">You found the optimal balance of seeds and land.</p>
-                </div>
-              )}
-              {feedback === "poor" && (
-                <div className="text-orange-800 dark:text-orange-200">
-                  <p className="font-bold">⚠️ Suboptimal Harvest</p>
-                  <p className="text-sm">You could have harvested more with better planning.</p>
-                  <p className="text-sm">Optimal would be ~{optimalYield} kg</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            {!harvested && (
-              <Button onClick={handleHarvest} className="w-full" size="lg">
-                🌾 Harvest Farm
-              </Button>
-            )}
-            {harvested && (
-              <>
-                {round < 3 && (
-                  <Button onClick={nextRound} className="w-full" size="lg">
-                    Next Farm
-                  </Button>
-                )}
-                {round === 3 && (
-                  <Button onClick={onClose} className="w-full" size="lg">
-                    Finish Game
-                  </Button>
-                )}
-              </>
-            )}
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 hover:bg-muted rounded-lg transition"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
           </div>
+        </DialogHeader>
 
-          {/* Concept Strip */}
-          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
-            💡 "More land or more seeds changes the result."
-          </div>
-        </div>
+        <GameplayUI />
       </DialogContent>
     </Dialog>
   );
