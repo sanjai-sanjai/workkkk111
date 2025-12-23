@@ -532,7 +532,7 @@ export default function EnergyQuest() {
               <Button
                 onClick={stopWater}
                 variant="outline"
-                className="font-bold"
+                className="font-bold text-black"
                 size="lg"
               >
                 🛑 Stop
