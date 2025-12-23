@@ -646,8 +646,8 @@ export default function TasksPage() {
             )}
           </div>
 
-          {/* Locked Tasks Section */}
-          {lockedTasks.length > 0 && (
+          {/* Locked Tasks Section - Only show when viewing all tasks */}
+          {lockedTasks.length > 0 && selectedStatusFilter === "all" && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
                 <Lock className="h-4 w-4 text-muted-foreground" />
