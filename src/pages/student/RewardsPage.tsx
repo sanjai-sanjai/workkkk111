@@ -161,7 +161,7 @@ export default function RewardsPage() {
         @media (max-width: 640px) {
           .balance-unit {
             font-family: "Nunito, sans-serif";
-            font-weight: 600;
+            font-weight: 700;
           }
         }
 
