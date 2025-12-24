@@ -143,10 +143,16 @@ export function SyncPopupModal({
     <>
       <ConfettiEffect trigger={showConfetti} />
       
-      {/* Backdrop */}
+      {/* Backdrop - Enhanced Glassmorphism */}
       <div
-        className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md transition-opacity"
+        className={cn(
+          'fixed inset-0 z-[100] backdrop-blur-sm transition-all duration-500',
+          isSuccess && !isSyncing ? 'bg-black/30' : 'bg-black/40'
+        )}
         aria-hidden="true"
+        style={{
+          backdropFilter: 'blur(4px)',
+        }}
       />
 
       {/* Modal Container */}
