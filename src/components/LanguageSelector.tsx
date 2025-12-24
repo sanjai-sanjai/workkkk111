@@ -28,25 +28,30 @@ const languages = [
 
 export function LanguageSelector({ isOpen, onClose }: LanguageSelectorProps) {
   const { i18n, t } = useTranslation();
+  const { setLanguage } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredLanguages = languages.filter(lang =>
     lang.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleLanguageSelect = (languageCode: string) => {
-    const selectedLanguage = languages.find(lang => lang.code === languageCode);
-    i18n.changeLanguage(languageCode);
-    localStorage.setItem('app_language', languageCode);
+  const handleLanguageSelect = async (languageCode: string) => {
+    try {
+      const selectedLanguage = languages.find(lang => lang.code === languageCode);
+      await setLanguage(languageCode);
 
-    // Show toast notification
-    if (selectedLanguage) {
-      toast.success(`Language changed to ${selectedLanguage.name}`, {
-        duration: 3000,
-      });
+      // Show toast notification
+      if (selectedLanguage) {
+        toast.success(t('sync.languageChanged', { language: selectedLanguage.name }) || `Language changed to ${selectedLanguage.name}`, {
+          duration: 3000,
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Failed to change language:', error);
+      toast.error(t('common.error') || 'Failed to change language');
     }
-
-    onClose();
   };
 
   return (
