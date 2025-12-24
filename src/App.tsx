@@ -378,6 +378,11 @@ const App = () => (
                     <VillageSkillsSubjectPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/learn/village-skills/active-learning" element={
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <VillageSkillsActiveLearningPage />
+                  </ProtectedRoute>
+                } />
 
                 {/* Passive Learning (Reading Pages) */}
                 <Route path="/learn/:subject/read" element={
