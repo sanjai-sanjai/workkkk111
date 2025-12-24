@@ -112,6 +112,7 @@ export default function TasksPage() {
   // STATE & HOOKS
   // =========================================================================
 
+  const { t } = useTranslation();
   const { useTasks: useTasksHook } = { useTasks: () => {} };
   const {
     allTasks,
@@ -133,6 +134,16 @@ export default function TasksPage() {
   } = useTasks();
 
   const { wallet } = usePlayCoins();
+
+  // Get translated category labels
+  const getCategoryLabel = (category: string) => {
+    return t(`tasks.categories.${category}`, category);
+  };
+
+  // Get translated status label
+  const getStatusLabel = (status: string) => {
+    return t(`tasks.status.${status}`, status);
+  };
   const [showProofModal, setShowProofModal] = useState(false);
   const [showTaskDetail, setShowTaskDetail] = useState(false);
   const [activeFilter, setActiveFilter] = useState<TaskCategory | "all">("all");
