@@ -35,7 +35,18 @@ export function StartupSurvival({ onComplete, onBack }: { onComplete: (score: nu
     pendingPitch: false
   });
 
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+
   const RENT_PER_DAY = 50;
+
+  const handleBackPress = () => {
+    // Show confirmation only if game is in progress
+    if (gameState.phase === "playing" && gameState.dailyHistory.length > 0) {
+      setShowExitConfirm(true);
+    } else if (onBack) {
+      onBack();
+    }
+  };
 
   const calculateDemand = (price: number): number => {
     // Demand curve: higher price = lower demand
