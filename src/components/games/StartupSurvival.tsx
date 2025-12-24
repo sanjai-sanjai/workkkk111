@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, X, ArrowLeft } from "lucide-react";
 
 interface GameState {
   phase: "splash" | "setup" | "playing" | "results" | "gameover";
@@ -21,7 +21,7 @@ interface GameState {
   pendingPitch: boolean;
 }
 
-export function StartupSurvival({ onComplete }: { onComplete: (score: number) => void }) {
+export function StartupSurvival({ onComplete, onBack }: { onComplete: (score: number) => void; onBack?: () => void }) {
   const [gameState, setGameState] = useState<GameState>({
     phase: "splash",
     day: 1,
