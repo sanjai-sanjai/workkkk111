@@ -41,20 +41,13 @@ export function EduCoin({
         }
       `}</style>
 
-      <style>{`
-        @media (max-width: 640px) {
-          .edu-coin-img {
-            width: 30px !important;
-          }
-        }
-      `}</style>
       <img
         src="https://cdn.builder.io/api/v1/image/assets%2Fa9d627de7a0c400a9a5045a9ca4a12ea%2F6df1eb74c5aa43698eea5229a2df81d4"
         alt="EduCoin"
         width={dimension}
         height={dimension}
         className={cn(
-          "drop-shadow-lg flex-shrink-0 edu-coin-img",
+          "drop-shadow-lg flex-shrink-0",
           animated && "edu-coin-animated"
         )}
         style={{
