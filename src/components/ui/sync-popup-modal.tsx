@@ -203,7 +203,8 @@ export function SyncPopupModal({
             ) : isSuccess && !hasFailedItems ? (
               <Button
                 onClick={onClose}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                className="flex-1"
+                variant="default"
                 size="lg"
               >
                 {t('sync.continueButton')}
