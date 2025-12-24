@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Clock, CheckCircle2 } from 'lucide-react';
+import { Clock, ArrowLeft, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -46,38 +46,35 @@ export function SyncPopupModal({
     if (isSyncing) {
       soundPlayedRef.current = false;
       setShowSuccessContent(false);
-      
-      // Reset completed items when sync starts
       setCompletedItems([]);
       
-      // Animate each item sequentially every 400ms
+      // Stagger item completion (0.8s per item)
       syncItems.forEach((item, index) => {
         const timer = setTimeout(() => {
           setCompletedItems(prev => [...prev, item.id]);
-        }, index * 400); // 400ms interval as per spec
+        }, index * 800);
 
         return () => clearTimeout(timer);
       });
     }
   }, [isSyncing, syncItems]);
 
-  // Handle success state
+  // Handle success state - play sound ONCE only
   useEffect(() => {
     if (isSuccess && !isSyncing) {
       setShowConfetti(true);
       
-      // Delay showing success content to allow checkmark animation
+      // Show success content after a brief delay
       const successTimer = setTimeout(() => {
         setShowSuccessContent(true);
-      }, 600);
+      }, 800);
 
-      // Play sound once when all steps complete
+      // Play success sound ONLY ONCE at the very end
       if (!soundPlayedRef.current) {
         soundPlayedRef.current = true;
-        // Delay sound slightly to sync with checkmark animation
         const soundTimer = setTimeout(() => {
-          playSyncSuccess({ volume: 0.15 });
-        }, 800);
+          playSyncSuccess({ volume: 0.12 });
+        }, 1200);
         
         return () => {
           clearTimeout(successTimer);
@@ -93,47 +90,21 @@ export function SyncPopupModal({
     }
   }, [isSuccess, isSyncing, playSyncSuccess]);
 
-  // Focus management and keyboard handling
+  // Accessibility - focus management
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
       
-      // Find the close button and focus it
       const timer = setTimeout(() => {
         if (modalRef.current) {
-          const closeButton = modalRef.current.querySelector('button');
-          closeButton?.focus();
+          const closeButton = modalRef.current.querySelector('[aria-label="Close sync modal"]');
+          (closeButton as HTMLElement)?.focus();
         }
       }, 100);
 
-      // Handle keyboard events
       const handleKeyDown = (e: KeyboardEvent) => {
-        // Close modal on Escape
         if (e.key === 'Escape' && isSuccess && !isSyncing) {
           onClose();
-        }
-        
-        // Prevent tab from leaving the modal
-        if (e.key === 'Tab' && modalRef.current) {
-          const focusableElements = modalRef.current.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          if (focusableElements.length === 0) return;
-
-          const firstElement = focusableElements[0] as HTMLElement;
-          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-          if (e.shiftKey) {
-            if (document.activeElement === firstElement) {
-              e.preventDefault();
-              lastElement.focus();
-            }
-          } else {
-            if (document.activeElement === lastElement) {
-              e.preventDefault();
-              firstElement.focus();
-            }
-          }
         }
       };
 
@@ -149,8 +120,6 @@ export function SyncPopupModal({
   }, [isOpen, isSuccess, isSyncing, onClose]);
 
   if (!isOpen) return null;
-
-  const hasFailedItems = syncItems.some(item => item.failed);
 
   const formatSyncTime = (timestamp: string | undefined) => {
     if (!timestamp) return '';
@@ -170,15 +139,16 @@ export function SyncPopupModal({
     <>
       <ConfettiEffect trigger={showConfetti} />
       
-      {/* Backdrop */}
+      {/* Backdrop - Glassmorphism friendly */}
       <div
-        className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[100] bg-black/50 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300"
         aria-hidden="true"
+        onClick={isSuccess && !isSyncing ? onClose : undefined}
       />
 
-      {/* Centered Modal - Glassmorphic design */}
+      {/* Modal Container */}
       <div 
-        className="fixed inset-0 top-0 left-0 right-0 bottom-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+        className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="sync-modal-title"
@@ -186,263 +156,225 @@ export function SyncPopupModal({
         <div
           ref={modalRef}
           className={cn(
-            'w-full max-w-md pointer-events-auto rounded-3xl',
-            'backdrop-blur-2xl border border-purple-500/20',
-            'shadow-2xl',
-            'p-8 sm:p-10',
-            'animate-pop',
-            'flex flex-col gap-6',
-            'max-h-[90vh] overflow-y-auto'
+            'w-full max-w-sm pointer-events-auto rounded-2xl',
+            'flex flex-col',
+            'max-h-[85vh] overflow-hidden',
+            !isSyncing && isSuccess ? 'animate-success-pop' : 'animate-modal-entrance'
           )}
           style={{
-            background: 'linear-gradient(180deg, rgba(30,27,60,0.9) 0%, rgba(15,12,30,0.95) 100%)',
-            boxShadow: '0 0 30px rgba(147, 51, 234, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: 'rgba(20, 20, 40, 0.65)',
+            backdropFilter: 'blur(18px)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: isSuccess 
+              ? '0 25px 50px rgba(34, 197, 94, 0.15), 0 10px 25px rgba(0, 0, 0, 0.3)'
+              : '0 25px 50px rgba(147, 51, 234, 0.15), 0 10px 25px rgba(0, 0, 0, 0.3)',
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header - Success Icon */}
-          {isSuccess && !hasFailedItems && (
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative w-20 h-20">
-                {/* Animated ring */}
-                <svg
-                  className="absolute inset-0 w-20 h-20 transform -rotate-90"
-                  viewBox="0 0 80 80"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
+          {/* Header - Back Button + Title */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <button
+              onClick={onClose}
+              aria-label="Close sync modal"
+              className={cn(
+                'p-2 rounded-lg transition-all duration-200',
+                'hover:bg-white/10 active:scale-95',
+                'text-gray-400 hover:text-white',
+                isSyncing ? 'opacity-40 cursor-not-allowed' : ''
+              )}
+              disabled={isSyncing}
+              title="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
+            <h2 
+              id="sync-modal-title"
+              className="text-center text-sm font-heading font-semibold text-white flex-1"
+            >
+              {isSyncing ? 'Syncing...' : 'Sync Complete'}
+            </h2>
+
+            <div className="w-9" />
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+            {/* Large Center Icon */}
+            <div className="flex justify-center">
+              <div className="relative w-24 h-24">
+                {isSyncing ? (
+                  // Syncing: Rotating circular arrows
+                  <svg
+                    className="w-24 h-24 text-purple-400 animate-sync-large-rotate"
+                    viewBox="0 0 24 24"
                     fill="none"
-                    stroke="rgba(34, 197, 94, 0.2)"
-                    strokeWidth="2"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    fill="none"
-                    stroke="rgb(34, 197, 94)"
-                    strokeWidth="2"
-                    strokeDasharray="226.19"
-                    strokeDashoffset="226.19"
-                    className="animate-success-ring"
-                  />
-                </svg>
-                
-                {/* Checkmark */}
-                <svg
-                  className="absolute inset-0 w-20 h-20"
-                  viewBox="0 0 80 80"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M24 40L36 52L56 28"
-                    stroke="rgb(34, 197, 94)"
-                    strokeWidth="4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeDasharray="48"
-                    strokeDashoffset="48"
-                    className="animate-success-check"
-                  />
-                </svg>
-              </div>
-
-              <div className="text-center">
-                <h2 
-                  id="sync-modal-title"
-                  className="text-2xl font-heading font-bold text-white mb-2"
-                >
-                  {t('sync.successTitle')}
-                </h2>
-                <p className="text-sm text-gray-300">
-                  {t('sync.successSubtitle')}
-                </p>
+                    aria-hidden="true"
+                  >
+                    <path d="M23 4v6h-6" />
+                    <path d="M20.49 15a9 9 0 1 1-2-8.83" />
+                  </svg>
+                ) : (
+                  // Success: Green checkmark with ring
+                  <>
+                    <svg
+                      className="absolute inset-0 w-24 h-24 text-emerald-500 animate-success-ring-large"
+                      viewBox="0 0 96 96"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <circle cx="48" cy="48" r="44" stroke="currentColor" strokeWidth="2" />
+                    </svg>
+                    <svg
+                      className="absolute inset-0 w-24 h-24 text-emerald-500"
+                      viewBox="0 0 96 96"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M24 48L40 64L72 32"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeDasharray="80"
+                        strokeDashoffset="80"
+                        className="animate-success-check-large"
+                      />
+                    </svg>
+                  </>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Loading State */}
-          {isSyncing && (
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative w-16 h-16">
-                <div
-                  className={cn(
-                    'absolute inset-0 rounded-full',
-                    'border-4 border-transparent border-t-purple-400 border-r-purple-400',
-                    'animate-spin'
-                  )}
-                  aria-hidden="true"
-                />
-              </div>
-              <h2 id="sync-modal-title" className="text-2xl font-heading font-bold text-white">
-                {t('sync.syncing')}
-              </h2>
-            </div>
-          )}
-
-          {/* Animated Sync Timeline */}
-          <div className="space-y-2">
-            {syncItems.map((item, index) => {
-              const isCompleted = completedItems.includes(item.id);
-              const isCurrent = !isCompleted && syncItems.slice(0, index).every(i => completedItems.includes(i.id));
-              
-              return (
-                <div
-                  key={item.id}
-                  className={cn(
-                    'px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-500',
-                    isCompleted && 'bg-green-500/20 border border-green-500/40 shadow-sm',
-                    isCurrent && isSyncing && 'bg-purple-500/25 border border-purple-500/40 shadow-sm',
-                    !isCompleted && !isCurrent && 'bg-slate-700/15 border border-slate-700/10',
-                  )}
-                  style={{
-                    opacity: isCompleted || isSyncing ? 1 : 0.5,
-                    animation: isCompleted ? `slideInSync 0.4s ease-out forwards` : 'none',
-                  }}
-                >
-                  {/* Icon - animated loader or checkmark */}
-                  <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center relative">
-                    {isCompleted ? (
-                      <div className="relative w-5 h-5">
+            {/* Sync Items List */}
+            <div className="space-y-2">
+              {syncItems.map((item, index) => {
+                const isCompleted = completedItems.includes(item.id);
+                const isCurrent = !isCompleted && syncItems.slice(0, index).every(i => completedItems.includes(i.id));
+                
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      'px-4 py-3 rounded-lg flex items-center gap-3',
+                      'transition-all duration-300',
+                      isCompleted && 'bg-emerald-500/12 border border-emerald-500/25',
+                      isCurrent && isSyncing && 'bg-purple-500/15 border border-purple-500/25 shadow-sm',
+                      !isCompleted && !isCurrent && 'bg-white/3 border border-white/5',
+                    )}
+                    style={{
+                      opacity: isCompleted || isSyncing ? 1 : 0.5,
+                      animation: isCompleted ? `slideInFromLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards` : 'none',
+                    }}
+                  >
+                    {/* Status Indicator */}
+                    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                      {isCompleted ? (
                         <svg
-                          className="absolute inset-0 w-5 h-5 text-green-400"
-                          viewBox="0 0 20 20"
+                          className="w-6 h-6 text-emerald-400 animate-check-morph"
+                          viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"
                         >
                           <path
-                            d="M5 10L8 13L15 6"
+                            d="M5 12L10 17L19 8"
                             stroke="currentColor"
-                            strokeWidth="2"
+                            strokeWidth="2.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="animate-success-check-small"
+                            strokeDasharray="30"
+                            strokeDashoffset="30"
+                            className="animate-check-draw"
                           />
                         </svg>
-                        {/* Pulse effect for completed item */}
-                        <div 
-                          className="absolute inset-0 rounded-full bg-green-400/30"
-                          style={{
-                            animation: 'pulse-check 0.6s ease-out forwards'
-                          }}
-                          aria-hidden="true"
-                        />
-                      </div>
-                    ) : isCurrent && isSyncing ? (
-                      <div
-                        className="w-2 h-2 rounded-full bg-purple-400"
-                        style={{
-                          animation: 'smooth-pulse 2s ease-in-out infinite'
-                        }}
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <div className="w-2 h-2 rounded-full bg-gray-500/50" aria-hidden="true" />
+                      ) : isCurrent && isSyncing ? (
+                        <div className="relative w-2 h-2">
+                          <div className="absolute inset-0 rounded-full bg-purple-400 animate-dot-pulse" />
+                        </div>
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-gray-600/50" aria-hidden="true" />
+                      )}
+                    </div>
+
+                    {/* Item Label & Icon */}
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                      <span className="text-base flex-shrink-0" aria-hidden="true">{item.icon}</span>
+                      <p className={cn(
+                        'text-sm font-medium truncate',
+                        isCompleted ? 'text-emerald-300' : 'text-gray-300'
+                      )}>
+                        {item.label}
+                      </p>
+                    </div>
+
+                    {/* Completion Badge */}
+                    {isCompleted && (
+                      <span className="text-xs font-bold text-emerald-400 flex-shrink-0">✓</span>
                     )}
                   </div>
+                );
+              })}
+            </div>
 
-                  {/* Label and icon */}
-                  <div className="flex-1 flex items-center gap-2 min-w-0">
-                    <span className="text-sm" aria-hidden="true">{item.icon}</span>
-                    <p className={cn(
-                      'text-sm font-medium truncate',
-                      isCompleted ? 'text-green-300' : 'text-gray-200'
-                    )}>
-                      {item.label}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  {isCompleted && (
-                    <span className="text-xs font-medium text-green-300" aria-hidden="true">
-                      ✓
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Final Summary - Show only after all steps complete */}
-          {showSuccessContent && isSuccess && !hasFailedItems && (
-            <div className="space-y-4 border-t border-purple-500/10 pt-4 animate-fade-in">
-              {/* Summary list with green checks */}
-              <div className="space-y-2">
-                {syncItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm text-gray-200">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Timestamp */}
-              {lastSyncTime && (
-                <div className="flex items-center justify-center gap-2 pt-2 border-t border-purple-500/10">
-                  <Clock className="w-4 h-4 text-gray-400" aria-hidden="true" />
-                  <p className="text-xs text-gray-400">
-                    {t('sync.lastSynced')}: {formatSyncTime(lastSyncTime)}
+            {/* Success Message - Appears after completion */}
+            {showSuccessContent && isSuccess && (
+              <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-heading font-bold text-emerald-400">
+                    Data Synced Successfully!
+                  </h3>
+                  <p className="text-sm text-gray-300">
+                    Your learning progress is now safely saved.
                   </p>
                 </div>
-              )}
+
+                {/* Timestamp */}
+                {lastSyncTime && (
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <Clock className="w-4 h-4" aria-hidden="true" />
+                    <span>Last synced: {formatSyncTime(lastSyncTime)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Primary Action Button */}
+          {isSuccess && !isSyncing && (
+            <div className="px-6 py-6 border-t border-white/5">
+              <Button
+                onClick={onClose}
+                className={cn(
+                  'w-full h-12 font-heading font-bold text-base',
+                  'rounded-lg transition-all duration-200',
+                  'flex items-center justify-center gap-2',
+                  'hover:scale-[1.01] active:scale-[0.99]',
+                  'shadow-lg hover:shadow-xl'
+                )}
+                style={{
+                  background: 'linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(34, 211, 238) 100%)',
+                  boxShadow: '0 0 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <span>Awesome! Continue Learning</span>
+                <BookOpen className="w-5 h-5" />
+              </Button>
             </div>
           )}
 
-          {/* Action Button - Only show when success */}
-          {isSuccess && !hasFailedItems && !isSyncing && (
-            <Button
-              onClick={onClose}
-              className={cn(
-                'w-full h-12 font-heading font-semibold text-base',
-                'rounded-xl transition-all duration-200',
-                'relative overflow-hidden',
-                'hover:scale-[1.02] active:scale-95'
-              )}
-              style={{
-                background: 'linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(147, 51, 234) 100%)',
-                boxShadow: '0 0 20px rgba(168, 85, 247, 0.4)',
-              }}
-              aria-label={t('sync.continueButton')}
-            >
-              <span className="relative z-10">
-                {t('sync.continueButton')}
-              </span>
-            </Button>
-          )}
-
-          {/* Disabled button during sync */}
+          {/* Disabled Button During Sync */}
           {isSyncing && (
-            <Button
-              disabled
-              className="w-full h-12"
-              size="lg"
-              aria-busy="true"
-            >
-              {t('sync.syncing')}
-            </Button>
-          )}
-
-          {/* Error state buttons */}
-          {hasFailedItems && !isSuccess && (
-            <div className="flex gap-3">
+            <div className="px-6 py-6 border-t border-white/5">
               <Button
-                onClick={onClose}
-                variant="outline"
-                className="flex-1"
-                size="lg"
+                disabled
+                className="w-full h-12"
               >
-                {t('sync.close')}
-              </Button>
-              <Button
-                onClick={onClose}
-                className="flex-1"
-                size="lg"
-              >
-                {t('sync.retrySync')}
+                Syncing...
               </Button>
             </div>
           )}
@@ -450,10 +382,30 @@ export function SyncPopupModal({
       </div>
 
       <style>{`
-        @keyframes slideInSync {
+        @keyframes modal-entrance {
           from {
             opacity: 0;
-            transform: translateX(-12px);
+            transform: scale(0.9) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        @keyframes success-pop {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.02);
+          }
+        }
+
+        @keyframes slideInFromLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
           }
           to {
             opacity: 1;
@@ -461,26 +413,33 @@ export function SyncPopupModal({
           }
         }
 
-        @keyframes success-ring {
-          0% {
-            stroke-dashoffset: 226.19;
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          100% {
-            stroke-dashoffset: 0;
-            opacity: 1;
-          }
+        @keyframes sync-large-rotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
-        @keyframes success-check {
+        @keyframes success-ring-large {
           0% {
-            stroke-dashoffset: 48;
+            stroke-dasharray: 276;
+            stroke-dashoffset: 276;
             opacity: 0;
           }
           50% {
+            opacity: 1;
+          }
+          100% {
+            stroke-dasharray: 276;
+            stroke-dashoffset: 0;
+            opacity: 1;
+          }
+        }
+
+        @keyframes success-check-large {
+          0% {
+            stroke-dashoffset: 80;
+            opacity: 0;
+          }
+          30% {
             opacity: 0;
           }
           100% {
@@ -489,9 +448,9 @@ export function SyncPopupModal({
           }
         }
 
-        @keyframes success-check-small {
+        @keyframes check-morph {
           from {
-            stroke-dashoffset: 20;
+            stroke-dashoffset: 30;
             opacity: 0;
           }
           to {
@@ -500,65 +459,61 @@ export function SyncPopupModal({
           }
         }
 
-        @keyframes pulse-check {
-          0% {
-            transform: scale(0.8);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(2);
-            opacity: 0;
+        @keyframes check-draw {
+          to {
+            stroke-dashoffset: 0;
           }
         }
 
-        @keyframes smooth-pulse {
+        @keyframes dot-pulse {
           0%, 100% {
             opacity: 1;
           }
           50% {
-            opacity: 0.75;
+            opacity: 0.4;
           }
         }
 
         @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
-        .animate-success-ring {
-          animation: success-ring 0.8s ease-out forwards;
+        .animate-modal-entrance {
+          animation: modal-entrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        .animate-success-check {
-          animation: success-check 0.8s ease-out forwards;
+        .animate-success-pop {
+          animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .animate-sync-large-rotate {
+          animation: sync-large-rotate 5s linear infinite;
+        }
+
+        .animate-success-ring-large {
+          animation: success-ring-large 0.8s ease-out forwards;
+        }
+
+        .animate-success-check-large {
+          animation: success-check-large 0.8s ease-out forwards;
           animation-delay: 0.3s;
         }
 
-        .animate-success-check-small {
-          animation: success-check-small 0.3s ease-out forwards;
+        .animate-check-morph {
+          animation: check-morph 0.4s ease-out forwards;
+        }
+
+        .animate-check-draw {
+          animation: check-draw 0.4s ease-out forwards;
+        }
+
+        .animate-dot-pulse {
+          animation: dot-pulse 1.2s ease-in-out infinite;
         }
 
         .animate-fade-in {
           animation: fade-in 0.4s ease-out forwards;
-        }
-
-        .animate-pop {
-          animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        @keyframes pop {
-          from {
-            opacity: 0;
-            transform: scale(0.85);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
         }
       `}</style>
     </>
