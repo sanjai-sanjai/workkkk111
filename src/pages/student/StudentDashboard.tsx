@@ -27,15 +27,16 @@ import {
 import { useNavigate } from "react-router-dom";
 const mascotPointingUrl = "https://cdn.builder.io/api/v1/image/assets%2F128ddd532bd34e33805885edbd9b265d%2F3c99deeaec0d40fdbbcf8869ed6c6a9b";
 
-const subjects = [
-  { icon: Atom, title: "Physics", progress: 65, color: "primary", path: "/learn/physics" },
-  { icon: FlaskConical, title: "Chemistry", progress: 45, color: "secondary", path: "/learn/chemistry" },
-  { icon: Heart, title: "Biology", progress: 30, color: "destructive", path: "/learn/biology" },
-  { icon: Calculator, title: "Mathematics", progress: 80, color: "badge", path: "/learn/mathematics" },
-  { icon: Laptop, title: "Technology", progress: 20, color: "primary", path: "/learn/technology" },
-  { icon: Wallet, title: "Finance", progress: 55, color: "accent", path: "/learn/finance" },
-  { icon: Lightbulb, title: "Entrepreneurship", progress: 25, color: "badge", path: "/learn/entrepreneurship" },
-  { icon: TreePine, title: "Village Skills", progress: 10, color: "secondary", path: "/learn/village-skills" },
+// Subject configuration - titles are translated via i18n
+const subjectConfig = [
+  { icon: Atom, titleKey: "physics", progress: 65, color: "primary", path: "/learn/physics" },
+  { icon: FlaskConical, titleKey: "chemistry", progress: 45, color: "secondary", path: "/learn/chemistry" },
+  { icon: Heart, titleKey: "biology", progress: 30, color: "destructive", path: "/learn/biology" },
+  { icon: Calculator, titleKey: "mathematics", progress: 80, color: "badge", path: "/learn/mathematics" },
+  { icon: Laptop, titleKey: "technology", progress: 20, color: "primary", path: "/learn/technology" },
+  { icon: Wallet, titleKey: "finance", progress: 55, color: "accent", path: "/learn/finance" },
+  { icon: Lightbulb, titleKey: "entrepreneurship", progress: 25, color: "badge", path: "/learn/entrepreneurship" },
+  { icon: TreePine, titleKey: "villageSkills", progress: 10, color: "secondary", path: "/learn/village-skills" },
 ];
 
 export default function StudentDashboard() {
