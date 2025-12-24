@@ -259,7 +259,7 @@ export default function TasksPage() {
   // =========================================================================
 
   return (
-    <AppLayout role="student" playCoins={wallet?.balance || 0} title={t('common.tasks')}>
+    <AppLayout role="student" playCoins={wallet?.balance || 0} title={t('tasks.title')}>
       {/* MODALS */}
       {selectedTask && (
         <>
