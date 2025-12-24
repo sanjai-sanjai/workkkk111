@@ -261,11 +261,11 @@ export function DataSyncStatus({ className }: DataSyncStatusProps) {
         @keyframes pulse-subtle {
           0%, 100% {
             opacity: 1;
-            box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
           }
           50% {
             opacity: 0.8;
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
           }
         }
 
@@ -273,8 +273,8 @@ export function DataSyncStatus({ className }: DataSyncStatusProps) {
           animation: shake 0.4s ease-in-out;
         }
 
-        .animate-sync-rotate {
-          animation: sync-rotate 1.2s linear infinite;
+        .animate-sync-rotate-slow {
+          animation: sync-rotate 5s linear infinite;
         }
 
         .animate-pulse-subtle {
