@@ -52,10 +52,15 @@
     "logOut": "Log Out",
     "gameLevels": "Game Levels",
     "progress": "Progress",
-    "complete": "Complete",
+    "complete": "Levels Complete",
     "intermediate": "Intermediate",
+    "beginner": "Beginner",
+    "advanced": "Advanced",
+    "starter": "Starter",
+    "learner": "Learner",
     "startLevel": "Start Level",
-    "playAgain": "Play Again"
+    "playAgain": "Play Again",
+    "modulesComplete": "Modules Complete"
   },
   "dashboard": {
     "greeting": "Hey",
