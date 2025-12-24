@@ -83,6 +83,12 @@ export default function RewardsPage() {
   return (
     <AppLayout role="student" playCoins={currentBalance} title="Rewards Marketplace">
       <style>{`
+        /* Product Card Price Coin - Compact inline icon */
+        .edu-coin-product-price {
+          width: 18px !important;
+          height: 18px !important;
+        }
+
         @media (max-width: 640px) {
           .accent-blur-bg {
             width: 249px !important;
@@ -102,6 +108,10 @@ export default function RewardsPage() {
           }
           .hero-coin-image {
             margin: 0 auto !important;
+          }
+          .edu-coin-product-price {
+            width: 16px !important;
+            height: 16px !important;
           }
         }
       `}</style>
