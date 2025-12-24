@@ -196,7 +196,7 @@ export default function RewardsPage() {
                         <h2 className="font-display text-4xl font-bold text-accent">
                           {currentBalance.toLocaleString()}
                         </h2>
-                        <EduCoin size="lg" />
+                        <EduCoin size="lg" imgClassName="edu-coin-balance-lg" />
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">EduCoins</p>
                     </div>
