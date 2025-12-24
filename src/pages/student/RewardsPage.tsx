@@ -407,7 +407,7 @@ export default function RewardsPage() {
                         {/* Price and Info */}
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center justify-center gap-1">
-                            <EduCoin size="sm" />
+                            <EduCoin size="sm" imgClassName="edu-coin-product-price" />
                             <span
                               className={`font-display font-bold text-lg ${canAfford ? "text-accent" : "text-muted-foreground"
                                 }`}
