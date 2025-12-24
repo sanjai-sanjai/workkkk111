@@ -36,6 +36,16 @@
     "logout": "Logout",
     "settings": "Settings"
   },
+  "sync": {
+    "lastSynced": "Last synced",
+    "syncing": "Syncing...",
+    "syncedUpToDate": "✅ Synced up to date",
+    "readyToSync": "Ready to sync",
+    "justNow": "Just now",
+    "unknown": "Never synced",
+    "offline": "Offline – will sync when connected",
+    "languageChanged": "Language changed to English"
+  },
   "languages": {
     "english": "English",
     "hindi": "हिंदी (Hindi)",
