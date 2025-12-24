@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
