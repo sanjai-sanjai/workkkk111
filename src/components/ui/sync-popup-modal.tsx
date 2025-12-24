@@ -398,9 +398,9 @@ export function SyncPopupModal({
               onClick={onClose}
               className={cn(
                 'w-full h-12 font-heading font-semibold text-base',
-                'rounded-xl transition-all duration-300',
+                'rounded-xl transition-all duration-200',
                 'relative overflow-hidden',
-                'animate-pulse-subtle'
+                'hover:scale-[1.02] active:scale-95'
               )}
               style={{
                 background: 'linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(147, 51, 234) 100%)',
