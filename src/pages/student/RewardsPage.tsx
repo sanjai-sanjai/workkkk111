@@ -240,7 +240,7 @@ export default function RewardsPage() {
                         aspectRatio: "1 / 1",
                         filter: "drop-shadow(rgba(0, 0, 0, 0.04) 0px 10px 8px) drop-shadow(rgba(0, 0, 0, 0.1) 0px 4px 3px)",
                         objectFit: "contain",
-                        width: "48px",
+                        width: "35px",
                       }}
                     />
                   </div>
