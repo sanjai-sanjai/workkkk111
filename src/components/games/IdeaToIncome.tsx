@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, X, ArrowLeft } from "lucide-react";
 
 interface Location {
   id: string;
