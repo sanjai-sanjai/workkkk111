@@ -24,7 +24,7 @@ import {
   Flame,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const mascotPointingUrl = "https://cdn.builder.io/api/v1/image/assets%2Fecf135b7255f45f9a20859de9b268e89%2F715ee70c0f334d8eb4b84d3d6dc44a63";
+const mascotPointingUrl = "https://cdn.builder.io/api/v1/image/assets%2F128ddd532bd34e33805885edbd9b265d%2F3c99deeaec0d40fdbbcf8869ed6c6a9b";
 
 const subjects = [
   { icon: Atom, title: "Physics", progress: 65, color: "primary", path: "/learn/physics" },
