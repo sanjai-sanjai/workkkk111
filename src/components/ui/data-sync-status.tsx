@@ -318,8 +318,17 @@ export function DataSyncStatus({ className }: DataSyncStatusProps) {
           75% { transform: translateX(4px); }
         }
 
+        @keyframes spin-smooth {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .animate-shake {
           animation: shake 0.4s ease-in-out;
+        }
+
+        .animate-spin-smooth {
+          animation: spin-smooth 1.5s linear infinite;
         }
       `}</style>
     </>
