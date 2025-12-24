@@ -202,15 +202,22 @@ export default function HelpPage() {
 
         {/* Welcome Section */}
         <div className="relative z-10 max-w-2xl mx-auto mb-12">
+          <style>{`
+            @media (max-width: 640px) {
+              .help-heading {
+                font-weight: 600;
+              }
+            }
+          `}</style>
           <div className="text-center space-y-4 mb-8">
             <div className="flex justify-center">
               <img
-                src={mascotExcited}
+                src="https://cdn.builder.io/api/v1/image/assets%2Ff07f67c11935460db26135cb9fa20837%2Fdab3fb2f1cd64797bf8139a83849d19f"
                 alt="Help Guide"
                 className="w-40 h-40 object-contain animate-[bounce_2s_ease-in-out_infinite]"
               />
             </div>
-            <h1 className="font-heading text-4xl font-bold text-foreground">
+            <h1 className="help-heading font-heading text-4xl font-bold text-foreground">
               Need Help? We've Got You 😊
             </h1>
             <p className="text-lg text-muted-foreground">
