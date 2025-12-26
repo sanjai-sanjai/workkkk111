@@ -4,7 +4,6 @@ import { GameBadge } from "./game-badge";
 import { ConfettiEffect } from "./confetti-effect";
 import { Trophy, Sparkles, X } from "lucide-react";
 import { Button } from "./button";
-import mascotCelebration from "@/assets/mascot-celebration.png";
 
 interface AchievementNotificationProps {
   show: boolean;
