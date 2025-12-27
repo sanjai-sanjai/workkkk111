@@ -13,7 +13,7 @@ import {
   Loader2,
   Zap,
 } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, Suspense, lazy } from "react";
 import { useWallet } from "@/contexts/WalletContext";
 import { toast } from "sonner";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
@@ -28,6 +28,21 @@ import {
 } from "@/data/comprehensive-rewards-catalog";
 import mascotCelebrate from "@/assets/mascot-celebrate.png";
 import mascotExcited from "@/assets/mascot-excited.png";
+import { RedemptionConfirmationModal } from "@/components/student/RedemptionConfirmationModal";
+import { QRGenerationLoading } from "@/components/student/QRGenerationLoading";
+import { QRSuccessModal } from "@/components/student/QRSuccessModal";
+import { createRedemptionData } from "@/lib/qr-utils";
+import type { RedemptionData } from "@/lib/qr-utils";
+
+// Lazy load QRCode component since it depends on qrcode.react
+let QRCodeComponent: any = null;
+try {
+  const QRCode = require("qrcode.react").default;
+  QRCodeComponent = QRCode;
+} catch (e) {
+  // qrcode.react not installed yet
+  QRCodeComponent = null;
+}
 
 // Filter list in exact order as specified
 const FILTER_ORDER: FilterType[] = [
