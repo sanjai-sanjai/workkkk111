@@ -67,6 +67,14 @@ export default function RewardsPage() {
   const [isSpending, setIsSpending] = useState(false);
   const filterScrollRef = useRef<HTMLDivElement>(null);
 
+  // QR Redemption Flow States
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [showQRSuccessModal, setShowQRSuccessModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<(typeof comprehensiveRewardsCatalog)[0] | null>(null);
+  const [generatedRedemption, setGeneratedRedemption] = useState<RedemptionData | null>(null);
+  const [savedRedemptions, setSavedRedemptions] = useState<RedemptionData[]>([]);
+
   const { balance, earned, spent, transactions, addTransaction } = useWallet();
   const { playSuccess } = useSoundEffects();
 
@@ -77,24 +85,75 @@ export default function RewardsPage() {
     return getProductsByFilter(activeFilter);
   }, [activeFilter]);
 
-  const handleRedeem = (product: (typeof comprehensiveRewardsCatalog)[0]) => {
-    if (currentBalance >= product.educoinsCost) {
-      setIsSpending(true);
+  // Handle redemption confirmation - shows confirmation modal
+  const handleRedeemClick = (product: (typeof comprehensiveRewardsCatalog)[0]) => {
+    setSelectedProduct(product);
+    setShowConfirmationModal(true);
+  };
 
-      // Update wallet with redemption
-      addTransaction(product.educoinsCost, "spend", `Redeemed: ${product.name}`);
+  // Handle confirmation - starts loading sequence
+  const handleConfirmRedemption = async () => {
+    if (!selectedProduct) return;
+
+    setShowConfirmationModal(false);
+    setShowLoadingModal(true);
+
+    // Simulate 5-second QR generation process
+    setTimeout(() => {
+      setShowLoadingModal(false);
+
+      // Create redemption data
+      const redemptionData = createRedemptionData(
+        "student_" + Date.now(), // Placeholder student ID
+        selectedProduct.id,
+        selectedProduct.name,
+        selectedProduct.educoinsCost
+      );
+
+      setGeneratedRedemption(redemptionData);
+      setShowQRSuccessModal(true);
+    }, 5000);
+  };
+
+  // Handle saving redemption to wallet
+  const handleSaveToWallet = () => {
+    if (generatedRedemption) {
+      // Deduct coins from wallet
+      addTransaction(
+        generatedRedemption.coinsRedeemed,
+        "spend",
+        `Redeemed: ${generatedRedemption.productName}`
+      );
+
+      // Save to redemptions list
+      setSavedRedemptions([...savedRedemptions, generatedRedemption]);
+
+      // Show old success modal briefly for compatibility
+      if (selectedProduct) {
+        setRedeemedItem(selectedProduct.name);
+        setRedeemedPrice(selectedProduct.educoinsCost);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      }
 
       playSuccess?.();
-      setRedeemedItem(product.name);
-      setRedeemedPrice(product.educoinsCost);
-      setShowSuccess(true);
-      setIsSpending(false);
-      setTimeout(() => setShowSuccess(false), 4000);
-      toast.success(t('rewards.redeemSuccess', { name: product.name }));
-    } else {
-      const needed = coinsToUnlock(currentBalance, product.educoinsCost);
-      toast.error(t('rewards.needMoreCoins', { needed }));
+      toast.success(
+        t("redemption.savedToWallet", {
+          defaultValue: "Redemption saved to My Redemptions wallet!",
+        })
+      );
+
+      // Close QR modal
+      setShowQRSuccessModal(false);
+      setGeneratedRedemption(null);
+      setSelectedProduct(null);
     }
+  };
+
+  // Legacy handleRedeem for backward compatibility (simple redemption)
+  const handleRedeem = (product: (typeof comprehensiveRewardsCatalog)[0]) => {
+    // Now opens QR redemption flow instead
+    handleRedeemClick(product);
   };
 
   return (
