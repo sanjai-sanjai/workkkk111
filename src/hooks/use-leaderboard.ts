@@ -20,41 +20,77 @@ export function useLeaderboard(limit = 20) {
   const leaderboardQuery = useQuery({
     queryKey: ["leaderboard", limit],
     queryFn: async () => {
-      // Get top users by XP with their profiles
-      const { data: levels, error: levelsError } = await supabase
-        .from("user_levels")
-        .select(`
-          user_id,
-          current_level,
-          total_xp
-        `)
-        .order("total_xp", { ascending: false })
-        .limit(limit);
-      
-      if (levelsError) throw levelsError;
+      // Return empty data if Supabase is not configured
+      if (!hasSupabaseConfig()) {
+        console.warn("Supabase not configured - returning demo leaderboard data");
+        // Return demo data for development
+        return [
+          {
+            user_id: "demo-1",
+            current_level: 8,
+            total_xp: 2450,
+            profile: {
+              full_name: "Demo Learner 1",
+              avatar_url: null,
+              village: "Demo Village",
+              school: null,
+            },
+          },
+          {
+            user_id: "demo-2",
+            current_level: 6,
+            total_xp: 1800,
+            profile: {
+              full_name: "Demo Learner 2",
+              avatar_url: null,
+              village: "Demo Village",
+              school: null,
+            },
+          },
+        ];
+      }
 
-      // Get profiles for these users
-      const userIds = levels?.map(l => l.user_id) ?? [];
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, full_name, avatar_url, village, school")
-        .in("id", userIds);
+      try {
+        // Get top users by XP with their profiles
+        const { data: levels, error: levelsError } = await supabase
+          .from("user_levels")
+          .select(`
+            user_id,
+            current_level,
+            total_xp
+          `)
+          .order("total_xp", { ascending: false })
+          .limit(limit);
 
-      if (profilesError) throw profilesError;
+        if (levelsError) throw levelsError;
 
-      // Merge data
-      const profileMap = new Map(profiles?.map(p => [p.id, p]));
-      const entries: LeaderboardEntry[] = levels?.map(level => ({
-        ...level,
-        profile: profileMap.get(level.user_id) ? {
-          full_name: profileMap.get(level.user_id)!.full_name,
-          avatar_url: profileMap.get(level.user_id)!.avatar_url,
-          village: profileMap.get(level.user_id)!.village,
-          school: profileMap.get(level.user_id)!.school,
-        } : undefined
-      })) ?? [];
+        // Get profiles for these users
+        const userIds = levels?.map(l => l.user_id) ?? [];
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, full_name, avatar_url, village, school")
+          .in("id", userIds);
 
-      return entries;
+        if (profilesError) throw profilesError;
+
+        // Merge data
+        const profileMap = new Map(profiles?.map(p => [p.id, p]));
+        const entries: LeaderboardEntry[] = levels?.map(level => ({
+          ...level,
+          profile: profileMap.get(level.user_id) ? {
+            full_name: profileMap.get(level.user_id)!.full_name,
+            avatar_url: profileMap.get(level.user_id)!.avatar_url,
+            village: profileMap.get(level.user_id)!.village,
+            school: profileMap.get(level.user_id)!.school,
+          } : undefined
+        })) ?? [];
+
+        return entries;
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        // Return empty array on error instead of throwing
+        return [];
+      }
     },
   });
 
