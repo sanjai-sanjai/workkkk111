@@ -372,6 +372,37 @@ export default function RewardsPage() {
           }
         }
       `}</style>
+      {/* ========== QR REDEMPTION MODALS ========== */}
+      {selectedProduct && (
+        <RedemptionConfirmationModal
+          open={showConfirmationModal}
+          onClose={() => {
+            setShowConfirmationModal(false);
+            setSelectedProduct(null);
+          }}
+          onConfirm={handleConfirmRedemption}
+          product={selectedProduct}
+          currentBalance={currentBalance}
+          isLoading={false}
+        />
+      )}
+
+      <QRGenerationLoading isOpen={showLoadingModal} />
+
+      {generatedRedemption && (
+        <QRSuccessModal
+          open={showQRSuccessModal}
+          onClose={() => {
+            setShowQRSuccessModal(false);
+            setGeneratedRedemption(null);
+            setSelectedProduct(null);
+          }}
+          onSaveToWallet={handleSaveToWallet}
+          redemptionData={generatedRedemption}
+          QRCodeComponent={QRCodeComponent}
+        />
+      )}
+
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 px-4 py-6 pb-28 relative overflow-hidden">
         {/* Animated Background Decorations */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-40 accent-blur-bg" />
