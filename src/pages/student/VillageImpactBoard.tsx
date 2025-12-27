@@ -215,28 +215,28 @@ export default function VillageImpactBoard() {
                   <Flame className="h-4 w-4 text-destructive" />
                   <span className="text-xs text-muted-foreground">Consistency</span>
                 </div>
-                <p className="font-bold text-foreground text-lg">{userStreak} days</p>
+                <p className="font-bold text-foreground text-lg">{Math.max(userStreak, 0)} days</p>
               </div>
               <div className="bg-background/50 rounded-lg p-2.5 border border-border/50">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Home className="h-4 w-4 text-primary" />
                   <span className="text-xs text-muted-foreground">Village Tasks</span>
                 </div>
-                <p className="font-bold text-foreground text-lg">{userVillageTasks} tasks</p>
+                <p className="font-bold text-foreground text-lg">{Math.max(userVillageTasks, 0)} tasks</p>
               </div>
               <div className="bg-background/50 rounded-lg p-2.5 border border-border/50">
                 <div className="flex items-center gap-1.5 mb-1">
                   <BookOpen className="h-4 w-4 text-secondary" />
                   <span className="text-xs text-muted-foreground">Learning</span>
                 </div>
-                <p className="font-bold text-foreground text-lg">{currentUserData?.current_level || 0}</p>
+                <p className="font-bold text-foreground text-lg">{Math.max(currentUserData?.current_level || 0, 0)}</p>
               </div>
               <div className="bg-background/50 rounded-lg p-2.5 border border-border/50">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Users className="h-4 w-4 text-accent" />
                   <span className="text-xs text-muted-foreground">Impact</span>
                 </div>
-                <p className="font-bold text-foreground text-lg">+{Math.floor((currentUserData?.contribution_score || 0) / 10)}</p>
+                <p className="font-bold text-foreground text-lg">+{Math.max(Math.floor(userContributionScore / 10), 0)}</p>
               </div>
             </div>
           </Card>
