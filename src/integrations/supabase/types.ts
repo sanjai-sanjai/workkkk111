@@ -989,6 +989,60 @@ export type Database = {
         }
         Relationships: []
       }
+      redemptions: {
+        Row: {
+          id: string
+          student_id: string
+          product_id: string
+          product_name: string
+          redemption_code: string
+          one_time_token: string
+          coins_redeemed: number
+          qr_data: Json
+          status: string
+          verified_by: string | null
+          verified_at: string | null
+          rejected_reason: string | null
+          created_at: string
+          expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          product_id: string
+          product_name: string
+          redemption_code: string
+          one_time_token: string
+          coins_redeemed: number
+          qr_data: Json
+          status?: string
+          verified_by?: string | null
+          verified_at?: string | null
+          rejected_reason?: string | null
+          created_at?: string
+          expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          product_id?: string
+          product_name?: string
+          redemption_code?: string
+          one_time_token?: string
+          coins_redeemed?: number
+          qr_data?: Json
+          status?: string
+          verified_by?: string | null
+          verified_at?: string | null
+          rejected_reason?: string | null
+          created_at?: string
+          expires_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
