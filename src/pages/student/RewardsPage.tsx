@@ -392,7 +392,8 @@ export default function RewardsPage() {
           }
         }
       `}</style>
-      {/* ========== QR REDEMPTION MODALS ========== */}
+      {/* ========== QR REDEMPTION FLOW ========== */}
+      {/* Confirmation Modal */}
       {selectedProduct && (
         <RedemptionConfirmationModal
           open={showConfirmationModal}
@@ -407,18 +408,26 @@ export default function RewardsPage() {
         />
       )}
 
+      {/* Loading Animation */}
       <QRGenerationLoading isOpen={showLoadingModal} />
 
-      {generatedRedemption && (
-        <QRSuccessModal
-          open={showQRSuccessModal}
-          onClose={() => {
-            setShowQRSuccessModal(false);
-            setGeneratedRedemption(null);
-            setSelectedProduct(null);
-          }}
-          onSaveToWallet={handleSaveToWallet}
+      {/* QR Result Screen - Full Page */}
+      {showQRResultScreen && generatedRedemption && (
+        <QRResultScreen
           redemptionData={generatedRedemption}
+          onBack={handleBackFromQR}
+          onSaveToWallet={handleSaveToWallet}
+          QRCodeComponent={QRCodeComponent}
+          isOnline={isOnline}
+        />
+      )}
+
+      {/* My Redeemed Rewards Screen - QR Wallet */}
+      {showMyRewardsScreen && (
+        <MyRedeemedRewardsScreen
+          redemptions={savedRedemptions}
+          onBack={handleBackFromMyRewards}
+          onViewQR={handleViewQRFromWallet}
           QRCodeComponent={QRCodeComponent}
         />
       )}
