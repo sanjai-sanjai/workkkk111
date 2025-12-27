@@ -30,7 +30,8 @@ import mascotCelebrate from "@/assets/mascot-celebrate.png";
 import mascotExcited from "@/assets/mascot-excited.png";
 import { RedemptionConfirmationModal } from "@/components/student/RedemptionConfirmationModal";
 import { QRGenerationLoading } from "@/components/student/QRGenerationLoading";
-import { QRSuccessModal } from "@/components/student/QRSuccessModal";
+import { QRResultScreen } from "@/components/student/QRResultScreen";
+import { MyRedeemedRewardsScreen } from "@/components/student/MyRedeemedRewardsScreen";
 import { createRedemptionData } from "@/lib/qr-utils";
 import type { RedemptionData } from "@/lib/qr-utils";
 
